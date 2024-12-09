@@ -1,0 +1,105 @@
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./database.db');
+
+// Add a user to the database
+const addUser = (user, callback) => {
+  db.run(`
+    INSERT INTO Users (Username, Email, Password)
+    VALUES (?, ?, ?);
+  `, [user.username, user.email, user.password], function(err) {
+    callback(err, this.lastID);
+  });
+};
+
+// Get a user by their ID
+const getUserById = (id, callback) => {
+  db.get(`
+    SELECT * FROM Users
+    WHERE UserID = ?;
+  `, [id], (err, row) => {
+    callback(err, row);
+  });
+};
+
+// Get a user by their email
+const getUserByEmail = (email, callback) => {
+  db.get(`
+    SELECT * FROM Users
+    WHERE Email = ?;
+  `, [email], (err, row) => {
+    callback(err, row);
+  });
+};
+
+// Add a book to the database
+const addBook = (book, callback) => {
+  db.run(`
+    INSERT INTO Books (Title, Author, PublicationDate, ISBN)
+    VALUES (?, ?, ?, ?);
+  `, [book.title, book.author, book.publicationDate, book.isbn], function(err) {
+    callback(err, this.lastID);
+  });
+};
+
+// Get a book by its ID
+const getBookById = (id, callback) => {
+  db.get(`
+    SELECT * FROM Books
+    WHERE BookID = ?;
+  `, [id], (err, row) => {
+    callback(err, row);
+  });
+};
+
+// Create a borrow request
+const createBorrowRequest = (request, callback) => {
+  db.run(`
+    INSERT INTO Borrow_Requests (BookID, UserID, RequestDate)
+    VALUES (?, ?, ?);
+  `, [request.bookId, request.userId, request.requestDate], function(err) {
+    callback(err, this.lastID);
+  });
+};
+
+// Update book availability
+const updateBookAvailability = (bookId, available, callback) => {
+  db.run(`
+    UPDATE Books
+    SET Available = ?
+    WHERE BookID = ?;
+  `, [available, bookId], function(err) {
+    callback(err);
+  });
+};
+
+// Get all borrow requests for a user
+const getBorrowRequestsForUser = (userId, callback) => {
+  db.all(`
+    SELECT * FROM Borrow_Requests
+    WHERE UserID = ?;
+  `, [userId], (err, rows) => {
+    callback(err, rows);
+  });
+};
+
+// Get all borrow history for a user
+const getBorrowHistoryForUser = (userId, callback) => {
+  db.all(`
+    SELECT * FROM Borrow_History
+    WHERE UserID = ?;
+  `, [userId], (err, rows) => {
+    callback(err, rows);
+  });
+};
+
+module.exports = {
+  addUser,
+  getUserById,
+  getUserByEmail,
+  addBook,
+  getBookById,
+  createBorrowRequest,
+  updateBookAvailability,
+  getBorrowRequestsForUser,
+  getBorrowHistoryForUser
+};
